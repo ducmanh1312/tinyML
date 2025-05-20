@@ -3,5 +3,8 @@
 /images/
 /PlantDoc-Dataset/test/
 /PlantDoc-Dataset/train/
-/PDDD/
+/PDDD/model/
+/PDDD/database/
+/PDDD/Codes/LSTM.mdl 
+/PDDD/Codes/ResNet_18.mdl 
 /FieldPlant-11/ViT_L.std_tomatocropped.index
