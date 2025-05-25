@@ -19,14 +19,15 @@ import os
 import random
 import pandas
 
-
+# create dataset object
+# 1 Read csv, run transform img, 
+# 2 returns the processed image tensor and the label
 class CustomDataset(Dataset):
-    def __init__(self, txt_file, root_dir, transform=None, tokenizer=None):
-
+    def __init__(self, txt_file, root_dir, transform=None):
         self.transform = transform
         self.root_dir = root_dir
-        self.tokenizer = tokenizer
-        self.data = pd.read_csv(txt_file, sep='\t')
+        # self.tokenizer = tokenizer
+        self.data = pd.read_csv(txt_file)
         self.data = self.data.dropna(axis=0, how='any')
 
     def __len__(self):
@@ -34,9 +35,10 @@ class CustomDataset(Dataset):
 
     def __getitem__(self, idx):
         d = self.data.iloc[idx]
+        print(f"DEBUG: Tên các cột được đọc từ CSV: {self.data.columns.tolist()}")
         label = d['label']
         img_name = d['file_path']
-        text = d['text']
+        # text = d['text']
         img_file = os.path.join(self.root_dir, img_name)
         try:
             image = Image.open(img_file).convert('RGB')
@@ -45,17 +47,17 @@ class CustomDataset(Dataset):
 
         if self.transform:
             image = self.transform(image)
-        text_input = self.tokenizer(text,
-                padding="max_length",
-                truncation=True,
-                max_length=30,
-                return_tensors="pt",
-                )
+        # text_input = self.tokenizer(text,
+        #         padding="max_length",
+        #         truncation=True,
+        #         max_length=30,
+        #         return_tensors="pt",
+        #         )
 
+        return image, torch.tensor(int(label)) 
+        #, text_input
 
-        return image, torch.tensor(label), text_input
-
-
+# example
 def test_dataset():
     root = '/home/zengh/Dataset/Fine-grained/CUB_200_2011/images'
     txt = '/home/zengh/Dataset/Fine-grained/CUB_200_2011/test_pytorch.txt'

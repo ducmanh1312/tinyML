@@ -67,17 +67,19 @@ if __name__ == '__main__':
         transforms.ToTensor(),
         transforms.Normalize(rgb_mean, rgb_std),
     ])
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+    # tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 
     # train_dataset = CustomDataset('CUB_200_2011/bird_train.txt', 'CUB_200_2011/images', transform_val, tokenizer)
     # dev_dataset = CustomDataset('CUB_200_2011/bird_test.txt', 'CUB_200_2011/images', transform_val, tokenizer)
 
-    train_dataset = CustomDataset("/media/icnlab/Data/Manh/tinyML/FieldPlant-11/train.csv", "/media/icnlab/Data/Manh/tinyML/FieldPlant-11/cropped", transform_val, tokenizer)
-    dev_dataset = CustomDataset("/media/icnlab/Data/Manh/tinyML/FieldPlant-11/test.csv", "/media/icnlab/Data/Manh/tinyML/FieldPlant-11/cropped", transform_val, tokenizer)
-    train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True)
-    dev_loader = DataLoader(dev_dataset, batch_size=128, shuffle=False)
+    # create dataset object from csv + dir_path
+    train_dataset = CustomDataset("/media/icnlab/Data/Manh/tinyML/FieldPlant-11/train.csv", "/media/icnlab/Data/Manh/tinyML/FieldPlant-11/cropped", transform_val)
+    dev_dataset = CustomDataset("/media/icnlab/Data/Manh/tinyML/FieldPlant-11/test.csv", "/media/icnlab/Data/Manh/tinyML/FieldPlant-11/cropped", transform_val)
+    # DataLoader loop through dataset for batch
+    train_loader = DataLoader(train_dataset, batch_size=8, shuffle=True)
+    dev_loader = DataLoader(dev_dataset, batch_size=8, shuffle=False)
 
-    # Solver is a wrapper for model traiing and testing
+# from config => run proper model
     if train_config.textual_model=="LSTM":
         textual_model = LSTM(class_num=118, vocab_size=500000, embedding_dim=128, hidden_dim=768, num_layers=8,
                          dropout=0.5)
@@ -139,28 +141,12 @@ if __name__ == '__main__':
     elif train_config.visual_model=="MobileNetV3":
         visual_model = mobilenet_v3_small(118)  
                 
-    solver = Solver
-    # # Replace the problematic line (around line 143)
-    # # From:
-    # solver = solver(visual_model, textual_model, train_config, dev_config, test_config, train_loader, dev_loader, dev_loader, is_train=True)
-    
-    # To:
+# Solver is a wrapper for model traiing and testing
     from utils.solver import Solver  # Make sure to import the Solver class
     textual_model = None  # Set to None when 'none' is specified
-    # Change these lines (around line 152-153)
-    solver = Solver
-    solver_instance = Solver(visual_model, textual_model, train_config, dev_config, test_config, train_loader, dev_loader, dev_loader, is_train=True)
+    solver = Solver(visual_model, textual_model, train_config, dev_config, test_config, 
+                   train_loader, dev_loader, dev_loader, is_train=True)
 
-    # # Build the model
-    # solver.build()
-
-    # # Train the model (test scores will be returned based on dev performance)
-    # solver.train()
-    
-        
-    # Build the model
-    solver_instance.build()
-    
-    # Train the model (test scores will be returned based on dev performance)
-    solver_instance.train()
-
+    # Build and train the model
+    solver.build()
+    solver.train()

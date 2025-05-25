@@ -11,10 +11,9 @@ from transformers import *
 
 from create_dataset import MOSI, MOSEI, UR_FUNNY, PAD, UNK
 
+# bert_tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 
-bert_tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-
-
+# only support provided dataset
 class MSADataset(Dataset):
     def __init__(self, config):
 
@@ -45,55 +44,57 @@ class MSADataset(Dataset):
     def __len__(self):
         return self.len
 
-
-
+# iterating over the dataset in batches, shuffling the data, and applying the collate_fn
 def get_loader(config, shuffle=True):
     """Load DataLoader of given DialogDataset"""
 
     dataset = MSADataset(config)
-    
+
     print(config.mode)
     config.data_len = len(dataset)
 
-
+    # taking a list of individual data samples (returned by __getitem__ ) and 
+    # combining them into a single batch tensor.
     def collate_fn(batch):
         '''
         Collate functions assume batch = [Dataset[i] for i in index_set]
         '''
         # for later use we sort the batch in descending order of length
         batch = sorted(batch, key=lambda x: x[0][0].shape[0], reverse=True)
-        
+
         # get the data out of the batch - use pad sequence util functions from PyTorch to pad things
 
-
+        # group and standard batch input in 4 type
         labels = torch.cat([torch.from_numpy(sample[1]) for sample in batch], dim=0)
-        sentences = pad_sequence([torch.LongTensor(sample[0][0]) for sample in batch], padding_value=PAD)
+        # sentences = pad_sequence([torch.LongTensor(sample[0][0]) for sample in batch], padding_value=PAD)
         visual = pad_sequence([torch.FloatTensor(sample[0][1]) for sample in batch])
-        acoustic = pad_sequence([torch.FloatTensor(sample[0][2]) for sample in batch])
+        # acoustic = pad_sequence([torch.FloatTensor(sample[0][2]) for sample in batch])
 
         ## BERT-based features input prep
 
-        SENT_LEN = sentences.size(0)
-        # Create bert indices using tokenizer
+        # SENT_LEN = sentences.size(0)
+        # # Create bert indices using tokenizer
+    
+        # bert_details = []
+        # for sample in batch:
+        #     text = " ".join(sample[0][3])
+        #     encoded_bert_sent = bert_tokenizer.encode_plus(
+        #         text, max_length=SENT_LEN+2, add_special_tokens=True, pad_to_max_length=True)
+        #     bert_details.append(encoded_bert_sent)
 
-        bert_details = []
-        for sample in batch:
-            text = " ".join(sample[0][3])
-            encoded_bert_sent = bert_tokenizer.encode_plus(
-                text, max_length=SENT_LEN+2, add_special_tokens=True, pad_to_max_length=True)
-            bert_details.append(encoded_bert_sent)
 
-
-        # Bert things are batch_first
-        bert_sentences = torch.LongTensor([sample["input_ids"] for sample in bert_details])
-        bert_sentence_types = torch.LongTensor([sample["token_type_ids"] for sample in bert_details])
-        bert_sentence_att_mask = torch.LongTensor([sample["attention_mask"] for sample in bert_details])
+        # # Bert things are batch_first
+        # bert_sentences = torch.LongTensor([sample["input_ids"] for sample in bert_details])
+        # bert_sentence_types = torch.LongTensor([sample["token_type_ids"] for sample in bert_details])
+        # bert_sentence_att_mask = torch.LongTensor([sample["attention_mask"] for sample in bert_details])
 
 
         # lengths are useful later in using RNNs
         lengths = torch.LongTensor([sample[0][0].shape[0] for sample in batch])
 
-        return sentences, visual, acoustic, labels, lengths, bert_sentences, bert_sentence_types, bert_sentence_att_mask
+        # Note: The return statement needs to be adjusted if you are removing bert_sentences, bert_sentence_types, and bert_sentence_att_mask
+        # return sentences, visual, acoustic, labels, lengths, bert_sentences, bert_sentence_types, bert_sentence_att_mask
+        return visual, labels
 
 
     data_loader = DataLoader(

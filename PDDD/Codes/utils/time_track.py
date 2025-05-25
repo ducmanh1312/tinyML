@@ -1,34 +1,25 @@
 import time
 from functools import partial
 
-
+# calc runtime method
 def base_time_desc_decorator(method, desc='test_description'):
     def timed(*args, **kwargs):
-
-        # Print Description
-        # print('#' * 50)
         print(desc)
-        # print('#' * 50 + '\n')
-
-        # Calculation Runtime
+        
         start = time.time()
-
-        # Run Method
-        try:
-            result = method(*args, **kwargs)
-        except TypeError:
-            result = method(**kwargs)
-
-        # Print Runtime
-        print('Done! It took {:.2} secs\n'.format(time.time() - start))
-
+        
+        # Run Method - use *args to properly pass self
+        result = method(*args, **kwargs)
+        
+        print('Done! It took {:.2f} secs\n'.format(time.time() - start))
+        
         if result is not None:
             return result
-
+            
     return timed
 
-
-def time_desc_decorator(desc): return partial(base_time_desc_decorator, desc=desc)
+def time_desc_decorator(desc): 
+    return partial(base_time_desc_decorator, desc=desc)
 
 
 @time_desc_decorator('this is description')

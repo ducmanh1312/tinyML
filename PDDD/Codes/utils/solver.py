@@ -23,7 +23,7 @@ from utils import to_gpu, time_desc_decorator, DiffLoss, MSE, SIMSE, CMD
 
 import models
 
-
+# init the solver with configuration for training, development, testing, data loaders
 class Solver(object):
     def __init__(self, visual_model, textual_model, train_config, dev_config, test_config, train_data_loader,
                  dev_data_loader, test_data_loader, is_train=True, model=None):
@@ -38,34 +38,35 @@ class Solver(object):
         self.visual_model = visual_model
         # self.textual_model = textual_model
 
+# sets up the model(s) and optimizers.
     @time_desc_decorator('Build Graph')
     def build(self, cuda=True):
 
         if self.model is None:
             self.model = getattr(models, self.train_config.model)(self.train_config)
 
-        # Final list
-        for name, param in self.model.named_parameters():
+        # # Final list
+        # for name, param in self.model.named_parameters():
+    # 
+    # # Bert freezing customizations
+    #         if self.train_config.data == "mosei":
+    #             if "bertmodel.encoder.layer" in name:
+    #                 layer_num = int(name.split("encoder.layer.")[-1].split(".")[0])
+    #                 if layer_num <= (8):
+    #                     param.requires_grad = False
+    #         elif self.train_config.data == "ur_funny":
+    #             if "bert" in name:
+    #                 param.requires_grad = False
 
-            # Bert freezing customizations
-            if self.train_config.data == "mosei":
-                if "bertmodel.encoder.layer" in name:
-                    layer_num = int(name.split("encoder.layer.")[-1].split(".")[0])
-                    if layer_num <= (8):
-                        param.requires_grad = False
-            elif self.train_config.data == "ur_funny":
-                if "bert" in name:
-                    param.requires_grad = False
+    #         if 'weight_hh' in name:
+    #             nn.init.orthogonal_(param)
+    #         print('\t' + name, param.requires_grad)
 
-            if 'weight_hh' in name:
-                nn.init.orthogonal_(param)
-            print('\t' + name, param.requires_grad)
-
-        # Initialize weight of Embedding matrix with Glove embeddings
-        if not self.train_config.use_bert:
-            if self.train_config.pretrained_emb is not None:
-                self.model.embed.weight.data = self.train_config.pretrained_emb
-            self.model.embed.requires_grad = False
+    # # Initialize weight of Embedding matrix with Glove embeddings
+    #     if not self.train_config.use_bert:
+    #         if self.train_config.pretrained_emb is not None:
+    #             self.model.embed.weight.data = self.train_config.pretrained_emb
+    #         self.model.embed.requires_grad = False
 
         if torch.cuda.is_available() and cuda:
             self.model.cuda()
@@ -83,6 +84,7 @@ class Solver(object):
         self.model.load_state_dict(torch.load(f'/media/icnlab/Data/Manh/tinyML/PDDD/model/ConvNeXt.std'), strict=False)
         #self.optimizer.load_state_dict(torch.load(f'checkpoints/optim_2023-09-21_22:09:19.std'))
 
+# Implements the main training loop.
     @time_desc_decorator('Training Start!')
     def train(self):
         curr_patience = patience = self.train_config.patience
@@ -120,14 +122,17 @@ class Solver(object):
             for batch in tqdm(self.train_data_loader):
                 self.visual_model.zero_grad()
                 # self.textual_model.zero_grad()
-                vision, y, text_input = batch
-                input_ids, attention_masks, token_type_ids = text_input['input_ids'].squeeze(1), text_input[
-                    'attention_mask'].squeeze(1), text_input['token_type_ids'].squeeze(1)
+                # print('test',batch)
+                vision, y = batch
+                # text_input
+                
+                # input_ids, attention_masks, token_type_ids = text_input['input_ids'].squeeze(1), text_input[
+                #     'attention_mask'].squeeze(1), text_input['token_type_ids'].squeeze(1)
 
-                batch_size = input_ids.size(0)
-                input_ids = to_gpu(input_ids)
-                attention_masks = to_gpu(attention_masks)
-                token_type_ids = to_gpu(token_type_ids)
+                # batch_size = input_ids.size(0)
+                # input_ids = to_gpu(input_ids)
+                # attention_masks = to_gpu(attention_masks)
+                # token_type_ids = to_gpu(token_type_ids)
                 vision = to_gpu(vision)
                 y = to_gpu(y)
 
@@ -136,15 +141,15 @@ class Solver(object):
 
                 # textual_feature = textual_feature[0]
                 # masked_output = torch.mul(attention_masks.unsqueeze(2), textual_feature)
-                mask_len = torch.sum(attention_masks, dim=1, keepdim=True)
-                # textual_feature = torch.sum(masked_output, dim=1, keepdim=False)
+                # mask_len = torch.sum(attention_masks, dim=1, keepdim=True)
+                # # textual_feature = torch.sum(masked_output, dim=1, keepdim=False)
 
-                y_tilde = self.model(textual_feature, visual_feature)
+                # y_tilde = self.model(textual_feature, visual_feature)
 
                 if self.train_config.data == "ur_funny":
                     y = y.squeeze()
 
-                cls_loss = criterion(y_tilde, y)
+                # cls_loss = criterion(y_tilde, y)
                 diff_loss = self.get_diff_loss()
                 domain_loss = self.get_domain_loss()
                 recon_loss = self.get_recon_loss()
@@ -159,7 +164,7 @@ class Solver(object):
                 #     self.train_config.diff_weight * diff_loss + \
                 #     self.train_config.sim_weight * similarity_loss + \
                 #     self.train_config.recon_weight * recon_loss
-                loss = cls_loss
+                # loss = cls_loss
 
                 loss.backward()
 
@@ -170,10 +175,10 @@ class Solver(object):
                 self.visual_optimizer.step()
                 # self.textual_optimizer.step()
 
-                train_loss_cls.append(cls_loss.item())
+                # train_loss_cls.append(cls_loss.item())
                 train_loss_diff.append(diff_loss.item())
                 train_loss_recon.append(recon_loss.item())
-                train_loss.append(loss.item())
+                # train_loss.append(loss.item())
                 train_loss_sim.append(similarity_loss.item())
 
             train_losses.append(train_loss)

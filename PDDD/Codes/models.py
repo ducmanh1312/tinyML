@@ -78,11 +78,12 @@ class MISA(nn.Module):
             self.trnn1 = rnn(input_sizes[0], hidden_sizes[0], bidirectional=True)
             self.trnn2 = rnn(2 * hidden_sizes[0], hidden_sizes[0], bidirectional=True)
 
-        self.vrnn1 = rnn(input_sizes[1], hidden_sizes[1], bidirectional=True)
-        self.vrnn2 = rnn(2 * hidden_sizes[1], hidden_sizes[1], bidirectional=True)
+    # Init model structure
+        # self.vrnn1 = rnn(input_sizes[1], hidden_sizes[1], bidirectional=True)
+        # self.vrnn2 = rnn(2 * hidden_sizes[1], hidden_sizes[1], bidirectional=True)
 
-        self.arnn1 = rnn(input_sizes[2], hidden_sizes[2], bidirectional=True)
-        self.arnn2 = rnn(2 * hidden_sizes[2], hidden_sizes[2], bidirectional=True)
+        # self.arnn1 = rnn(input_sizes[2], hidden_sizes[2], bidirectional=True)
+        # self.arnn2 = rnn(2 * hidden_sizes[2], hidden_sizes[2], bidirectional=True)
 
         from modelpy.visual_model.ResNet_18_34 import ResNet18
         model = ResNet18()
@@ -203,7 +204,7 @@ class MISA(nn.Module):
             _, final_h2 = rnn2(packed_normed_h1)
 
         return final_h1, final_h2
-
+    # processing and aligning multimodal inputs
     def alignment(self, utterance_text, utterance_video):
 
         # batch_size = input_ids.size(0)
@@ -252,7 +253,7 @@ class MISA(nn.Module):
         h = torch.cat((h[0]*self.config.private_t_weight, h[1]*self.config.private_v_weight, h[2]*self.config.shared_t_weight, h[3]*self.config.shared_t_weight), dim=1)
         o = self.fusion(h)
         return o
-
+    # feature reconstruction
     def reconstruct(self, ):
 
         self.utt_t = (self.utt_private_t + self.utt_shared_t)
@@ -262,7 +263,7 @@ class MISA(nn.Module):
         self.utt_t_recon = self.recon_t(self.utt_t)
         self.utt_v_recon = self.recon_v(self.utt_v)
         # self.utt_a_recon = self.recon_a(self.utt_a)
-
+    # separating features into shared and private components.
     def shared_private(self, utterance_t, utterance_v, utterance_a=None):
 
         # Projecting to same sized space

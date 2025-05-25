@@ -3,6 +3,7 @@ import os
 import pandas as pd
 import argparse
 
+# HACK: preprocessing the raw dataset.
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--base_file', type=str, help='Path to the base folder of the dataset')

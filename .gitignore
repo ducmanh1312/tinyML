@@ -5,6 +5,6 @@
 /PlantDoc-Dataset/train/
 /PDDD/model/
 /PDDD/database/
-/PDDD/Codes/LSTM.mdl 
+/PDDD/Codes/utils/LSTM.mdl
 /PDDD/Codes/ResNet_18.mdl 
 /FieldPlant-11/ViT_L.std_tomatocropped.index

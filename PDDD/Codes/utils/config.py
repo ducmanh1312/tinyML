@@ -12,11 +12,12 @@ import torch.nn as nn
 word_emb_path = '/home/devamanyu/glove.840B.300d.txt'
 assert(word_emb_path is not None)
 
-
+# defines global variables
 username = Path.home().name
 project_dir = Path(__file__).resolve().parent.parent
 sdk_dir = project_dir.joinpath('CMU-MultimodalSDK')
 data_dir = project_dir.joinpath('datasets')
+# Map string to object path => to use
 data_dict = {'mosi': data_dir.joinpath('MOSI'), 'mosei': data_dir.joinpath(
     'MOSEI'), 'ur_funny': data_dir.joinpath('UR_FUNNY')}
 optimizer_dict = {'RMSprop': optim.RMSprop, 'Adam': optim.Adam}
@@ -24,7 +25,7 @@ activation_dict = {'elu': nn.ELU, "hardshrink": nn.Hardshrink, "hardtanh": nn.Ha
                    "leakyrelu": nn.LeakyReLU, "prelu": nn.PReLU, "relu": nn.ReLU, "rrelu": nn.RReLU,
                    "tanh": nn.Tanh}
 
-
+# convert string to boolean
 def str2bool(v):
     """string to boolean"""
     if v.lower() in ('yes', 'true', 't', 'y', '1'):
@@ -34,7 +35,7 @@ def str2bool(v):
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
 
-
+# object contain configuration settings
 class Config(object):
     def __init__(self, **kwargs):
         """Configuration Class: set kwargs as class attributes with setattr"""
@@ -62,7 +63,7 @@ class Config(object):
         config_str += pprint.pformat(self.__dict__)
         return config_str
 
-
+# retrieve the configuration in terminal
 def  get_config(parse=True, **optional_kwargs):
     """
     Get configurations as attributes of class
