@@ -1,5 +1,7 @@
 /FieldPlant-11/cropped/
 /FieldPlant-11/train/
+/FieldPlant-11/no_use/
+/FieldPlant-11/ViT_L.std_tomatocropped.index
 /images/
 /PlantDoc-Dataset/test/
 /PlantDoc-Dataset/train/
@@ -7,4 +9,5 @@
 /PDDD/database/
 /PDDD/Codes/utils/LSTM.mdl
 /PDDD/Codes/ResNet_18.mdl 
-/FieldPlant-11/ViT_L.std_tomatocropped.index
+/checkpoints/
+/lightning_logs/
