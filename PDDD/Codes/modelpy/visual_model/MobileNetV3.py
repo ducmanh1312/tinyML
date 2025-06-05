@@ -184,10 +184,10 @@ class MobileNetV3(nn.Module):
                                        activation_layer=nn.Hardswish))
         self.features = nn.Sequential(*layers)
         self.avgpool = nn.AdaptiveAvgPool2d(1)
-#        self.classifier = nn.Sequential(nn.Linear(lastconv_output_c, last_channel),
-#                                        nn.Hardswish(inplace=True),
-#                                        nn.Dropout(p=0.2, inplace=True),
-#                                        nn.Linear(last_channel, num_classes))
+        # self.classifier = nn.Sequential(nn.Linear(lastconv_output_c, last_channel),
+        #                                 nn.Hardswish(inplace=True),
+        #                                 nn.Dropout(p=0.2, inplace=True),
+        #                                 nn.Linear(last_channel, num_classes))
 
         # initial weights
         for m in self.modules():
@@ -207,12 +207,10 @@ class MobileNetV3(nn.Module):
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
 #        x = self.classifier(x)
-
         return x
 
     def forward(self, x: Tensor) -> Tensor:
         return self._forward_impl(x)
-
 
 def mobilenet_v3_large(num_classes: int = 1000,
                        reduced_tail: bool = False) -> MobileNetV3:
